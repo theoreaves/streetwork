@@ -7,17 +7,34 @@ require_once __DIR__ . '/sqlite.php';
 
 $caddb = new MeekroDB('127.0.0.1', 'root', '', 'hub_cad', '3306');
 $db = new MyDB();
-$result = $db->query("SELECT * FROM ms_streets where st_nm_base = 'OAKMONT' AND  l_postcode = '38632'");
+//$result = $db->query("SELECT * FROM ms_streets where st_nm_base = 'OAKMONT' AND  l_postcode = '38632'");
+$result = $db->query("SELECT * FROM ms_streets where l_postcode = '38632' or l_postcode='38671' or l_postcode='38654' or l_postcode='38680'");
 while($row = $result->fetchArray(SQLITE3_ASSOC) ) {
 	$left_from = $row['l_refaddr'];
 	$left_to = $row['l_nrefaddr'];
+	if ($left_from > $left_to){
+		$left_to = $row['l_refaddr'];
+		$left_from = $row['l_nrefaddr'];
+	}
+
 	$right_from = $row['r_refaddr'];
 	$right_to = $row['r_nrefaddr'];
+	if ($right_from > $right_to){
+		$right_to = $row['r_refaddr'];
+		$right_from = $row['r_nrefaddr'];
+	}
+
 	$street_direction = $row['st_nm_pref'];
 	$street_name = $row['st_nm_base'];
 	$street_type = $row['st_typ_aft'];
 	$left_city = $row['city_l'];
 	$right_city = $row['city_r'];
+
+	if (trim($left_from) != "" or trim($right_from) != ""){
+		echo "$left_from - $left_to $street_direction $street_name $street_type $left_city\n";
+		echo "$right_from - $right_to $street_direction $street_name $street_type $right_city\n";
+		echo "==-=-=-=-=-=-=-=-=-=-=-=-\n";
+	}
 
 }
 
