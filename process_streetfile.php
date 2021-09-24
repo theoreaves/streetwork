@@ -30,6 +30,43 @@ while($row = $result->fetchArray(SQLITE3_ASSOC) ) {
 	$left_city = $row['city_l'];
 	$right_city = $row['city_r'];
 
+	switch($left_city){
+		case "Hernando":
+			$left_street_jurisdiction_id = 1;
+			break;
+		case "Horn Lake":
+			$left_street_jurisdiction_id = 2;
+			break;
+		case "Southaven":
+			$left_street_jurisdiction_id = 3;
+			break;
+		case "Olive Branch":
+			$left_street_jurisdiction_id = 4;
+			break;
+		default:
+			$left_street_jurisdiction_id = 5;
+	}
+
+        switch($right_city){
+                case "Hernando":
+                        $right_street_jurisdiction_id = 1;
+                        break;
+                case "Horn Lake":
+                        $right_street_jurisdiction_id = 2;
+                        break;
+                case "Southaven":
+                        $right_street_jurisdiction_id = 3;
+                        break;
+                case "Olive Branch":
+                        $right_street_jurisdiction_id = 4;
+                        break;
+                default:
+                        $right_street_jurisdiction_id = 5;
+        }
+
+
+
+
 	if ((trim($street_name) !="") and (trim($left_from) != "" or trim($right_from) != "")){
 		echo "$left_from - $left_to $street_direction $street_name $street_type $left_city\n";
 		echo "$right_from - $right_to $street_direction $street_name $street_type $right_city\n";
@@ -43,8 +80,8 @@ while($row = $result->fetchArray(SQLITE3_ASSOC) ) {
 			'street_direction' => $street_direction,
 			'street_name' => $street_name,
 			'street_type' => $street_type,
-			'left_street_jurisdiction_id' => 1,
-			'right_street_jurisdiction_id' => 1
+			'left_street_jurisdiction_id' => $left_street_jurisdiction_id,
+			'right_street_jurisdiction_id' => $right_street_jurisdiction_id
 		];
 	
 		if (!is_numeric($left_from)){
@@ -79,8 +116,8 @@ while($row = $result->fetchArray(SQLITE3_ASSOC) ) {
 				'$street_direction',
 				'$street_name',
 				'$street_type',
-				1,
-				1
+				$left_street_jurisdiction_id,
+				$right_street_jurisdiction_id
 			)";
 		$street_insert = $caddb->query("$sql");
 	}
