@@ -25,21 +25,71 @@ while($row = $result->fetchArray(SQLITE3_ASSOC) ) {
 	}
 
 	$street_direction = $row['st_nm_pref'];
-	$street_name = $row['st_nm_base'];
+	$street_name = str_replace("'", "''", $row['st_nm_base']);
 	$street_type = $row['st_typ_aft'];
 	$left_city = $row['city_l'];
 	$right_city = $row['city_r'];
 
-	if (trim($left_from) != "" or trim($right_from) != ""){
+	if ((trim($street_name) !="") and (trim($left_from) != "" or trim($right_from) != "")){
 		echo "$left_from - $left_to $street_direction $street_name $street_type $left_city\n";
 		echo "$right_from - $right_to $street_direction $street_name $street_type $right_city\n";
 		echo "==-=-=-=-=-=-=-=-=-=-=-=-\n";
+
+		$data = [
+			'left_from' => $left_from,
+			'left_to' => $left_to,
+			'right_from' => $right_from,
+			'right_to' => $right_to,
+			'street_direction' => $street_direction,
+			'street_name' => $street_name,
+			'street_type' => $street_type,
+			'left_street_jurisdiction_id' => 1,
+			'right_street_jurisdiction_id' => 1
+		];
+	
+		if (!is_numeric($left_from)){
+			$left_from = 0;
+		}
+		if (!is_numeric($right_from)){
+			$right_from = 0;
+		}
+		if (!is_numeric($left_to)){
+			$left_to = 0;
+		}
+		if (!is_numeric($right_to)){
+			$right_to = 0;
+		}
+			
+		$sql = "insert into streets 
+			(
+				left_from,
+				left_to,
+				right_from,
+				right_to,
+				street_direction,
+				street_name,
+				street_type,
+				left_street_jurisdiction_id,
+				right_street_jurisdiction_id
+			) VALUES (
+				$left_from,
+				$left_to,
+				$right_from,
+				$right_to,
+				'$street_direction',
+				'$street_name',
+				'$street_type',
+				1,
+				1
+			)";
+		$street_insert = $caddb->query("$sql");
 	}
-
+			
+	
 }
-
-
-
+	
+	
+	
 
 
 //var_dump($result->fetchArray());
