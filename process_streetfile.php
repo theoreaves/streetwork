@@ -27,41 +27,59 @@ while($row = $result->fetchArray(SQLITE3_ASSOC) ) {
 	$street_direction = $row['st_nm_pref'];
 	$street_name = str_replace("'", "''", $row['st_nm_base']);
 	$street_type = $row['st_typ_aft'];
-	$left_city = $row['city_l'];
-	$right_city = $row['city_r'];
+
+	$sql = "select * from street_translates where field='TYPE' and description = '$street_type'";
+	$types = $caddb->query($sql);
+	if (isset($types[0])){
+		$type = $types[0];
+		$street_type = $type['code'];
+	}
+
+	$left_city = strtoupper($row['city_l']);
+	$right_city = strtoupper($row['city_r']);
 
 	switch($left_city){
-		case "Hernando":
+		case "HERNANDO":
 			$left_street_jurisdiction_id = 1;
+			$left_police_district = 'HNDO';
 			break;
-		case "Horn Lake":
+		case "HORN LAKE":
 			$left_street_jurisdiction_id = 2;
+			$left_police_district = 'HRNLKE';
 			break;
-		case "Southaven":
+		case "SOUTHAVEN":
 			$left_street_jurisdiction_id = 3;
+			$left_police_district = 'SHVN';
 			break;
-		case "Olive Branch":
+		case "OLIVE BRANCH":
 			$left_street_jurisdiction_id = 4;
+			$left_police_district = 'OBRANCH';
 			break;
 		default:
 			$left_street_jurisdiction_id = 5;
+			$left_police_district = 'COUNTY';
 	}
 
         switch($right_city){
-                case "Hernando":
+                case "HERNANDO":
                         $right_street_jurisdiction_id = 1;
+			$right_police_district = 'HNDO';
                         break;
-                case "Horn Lake":
+                case "HORN LAKE":
                         $right_street_jurisdiction_id = 2;
+			$right_police_district = 'HRNLKE';
                         break;
-                case "Southaven":
+                case "SOUTHAVEN":
                         $right_street_jurisdiction_id = 3;
+			$right_police_district = 'SHVN';
                         break;
-                case "Olive Branch":
+                case "OLIVE BRANCH":
                         $right_street_jurisdiction_id = 4;
+			$right_police_district = 'OBRANCH';
                         break;
                 default:
                         $right_street_jurisdiction_id = 5;
+			$right_police_district = 'OBRANCH';
         }
 
 
@@ -96,6 +114,33 @@ while($row = $result->fetchArray(SQLITE3_ASSOC) ) {
 		if (!is_numeric($right_to)){
 			$right_to = 0;
 		}
+
+		$l_attributes = [
+			1 => [
+				'discipline' => 'L',
+				'response_zone' => '10000'.$left_street_jurisdiction_id,
+				'district' => $left_police_district
+			],
+			2 => [
+				'discipline' => 'F',
+				'response_zone' => '20000'.$left_street_jurisdiction_id,
+				'district' => 'FIRE00'.$left_street_jurisdiction_id
+			]
+		];
+		$l_meta_data = json_encode($l_attributes);
+		$r_attributes = [
+			1 => [
+				'discipline' => 'L',
+				'response_zone' => '10000'.$right_street_jurisdiction_id,
+				'district' => $right_police_district
+			],
+			2 => [
+				'discipline' => 'F',
+				'response_zone' => '20000'.$right_street_jurisdiction_id,
+				'district' => 'FIRE00'.$right_street_jurisdiction_id
+			]
+		];
+		$r_meta_data = json_encode($r_attributes);
 			
 		$sql = "insert into streets 
 			(
@@ -106,6 +151,8 @@ while($row = $result->fetchArray(SQLITE3_ASSOC) ) {
 				street_direction,
 				street_name,
 				street_type,
+				left_meta_data,
+				right_meta_data,
 				left_street_jurisdiction_id,
 				right_street_jurisdiction_id
 			) VALUES (
@@ -116,6 +163,8 @@ while($row = $result->fetchArray(SQLITE3_ASSOC) ) {
 				'$street_direction',
 				'$street_name',
 				'$street_type',
+				'$l_meta_data',
+				'$r_meta_data',
 				$left_street_jurisdiction_id,
 				$right_street_jurisdiction_id
 			)";
