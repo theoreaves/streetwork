@@ -12,6 +12,10 @@ $result = $db->query("SELECT * FROM ms_streets where l_postcode = '38632' or l_p
 while($row = $result->fetchArray(SQLITE3_ASSOC) ) {
 	$left_from = $row['l_refaddr'];
 	$left_to = $row['l_nrefaddr'];
+	$l_postcode = $row['l_postcode'];
+	$r_postcode = $row['r_postcode'];
+	$l_esn = substr($l_postcode,2,3);
+	$r_esn = substr($r_postcode,2,3);
 	if ($left_from > $left_to){
 		$left_to = $row['l_refaddr'];
 		$left_from = $row['l_nrefaddr'];
@@ -119,11 +123,13 @@ while($row = $result->fetchArray(SQLITE3_ASSOC) ) {
 			1 => [
 				'discipline' => 'L',
 				'response_zone' => '10000'.$left_street_jurisdiction_id,
+				'esn' => $l_esn,
 				'district' => $left_police_district
 			],
 			2 => [
 				'discipline' => 'F',
 				'response_zone' => '20000'.$left_street_jurisdiction_id,
+				'esn' => $l_esn,
 				'district' => 'FIRE00'.$left_street_jurisdiction_id
 			]
 		];
@@ -132,11 +138,13 @@ while($row = $result->fetchArray(SQLITE3_ASSOC) ) {
 			1 => [
 				'discipline' => 'L',
 				'response_zone' => '10000'.$right_street_jurisdiction_id,
+				'esn' => $r_esn,
 				'district' => $right_police_district
 			],
 			2 => [
 				'discipline' => 'F',
 				'response_zone' => '20000'.$right_street_jurisdiction_id,
+				'esn' => $r_esn,
 				'district' => 'FIRE00'.$right_street_jurisdiction_id
 			]
 		];
